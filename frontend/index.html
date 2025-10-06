@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Place Search</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-search-location"></i> AI Place Search</h1>
+            <p>Find cafes, restaurants, and more with AI-powered search</p>
+        </header>
+
+        <div class="search-section">
+            <div class="input-group">
+                <label for="city">City</label>
+                <input type="text" id="city" placeholder="e.g., Bengaluru" />
+            </div>
+            
+            <div class="input-group">
+                <label for="area">Area</label>
+                <input type="text" id="area" placeholder="e.g., Koramangala" />
+            </div>
+            
+            <div class="input-group">
+                <label for="type">Type</label>
+                <select id="type">
+                    <option value="">Select type...</option>
+                    <option value="cafe">Cafe</option>
+                    <option value="restaurant">Restaurant</option>
+                    <option value="hospital">Hospital</option>
+                    <option value="hotel">Hotel</option>
+                    <option value="hostel">Hostel</option>
+                    <option value="mens_pg">Men's PG</option>
+                    <option value="womens_pg">Women's PG</option>
+                    <option value="paying_guest">Paying Guest</option>
+                    <option value="gym">Gym</option>
+                    <option value="pharmacy">Pharmacy</option>
+                    <option value="bank">Bank</option>
+                    <option value="atm">ATM</option>
+                    <option value="gas_station">Gas Station</option>
+                </select>
+            </div>
+            
+            <button id="searchBtn" class="search-btn">
+                <i class="fas fa-search"></i> Search Places
+            </button>
+        </div>
+
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Searching with AI...</p>
+        </div>
+
+        <div class="results-section" id="results" style="display: none;">
+            <h2>Search Results</h2>
+            <div id="resultsContainer"></div>
+        </div>
+
+        <div class="error-message" id="error" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="errorText"></span>
+        </div>
+    </div>
+
+    <footer>
+        <p>Powered by Generative AI | Built with ❤️ by Sri Ram Nalla</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
