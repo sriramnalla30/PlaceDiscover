@@ -1,5 +1,7 @@
-// Configuration
-const API_BASE_URL = "http://localhost:8000"; // Change this to your deployed backend URL
+// Configuration - UPDATE THIS AFTER BACKEND DEPLOYMENT
+// Replace 'http://localhost:8000' with your Railway backend URL
+// Example: const API_BASE_URL = "https://your-app-name.railway.app";
+const API_BASE_URL = "http://localhost:8000"; // CHANGE THIS TO YOUR DEPLOYED BACKEND URL
 
 // DOM Elements
 const cityInput = document.getElementById("city");
