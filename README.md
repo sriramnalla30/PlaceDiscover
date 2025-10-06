@@ -102,7 +102,3 @@ The application will return formatted results with:
 - Phone numbers
 - Google Maps integration
 - Direct dialer links
-
-## License
-
-MIT License
