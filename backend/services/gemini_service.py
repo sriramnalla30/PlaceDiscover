@@ -48,30 +48,30 @@ class GeminiService:
             search_term = place_type
             place_description = place_type
             
-        prompt = f"""Find general information about {search_term} locations in {area}, {city}, India.
+        prompt = f"""Find {search_term} locations in {area}, {city}, India with contact information.
 
-IMPORTANT: Instead of guessing specific business names, provide general location-based results.
+IMPORTANT: Provide real, verifiable places with phone numbers when possible.
 
-Return a JSON array with 2-3 general location suggestions:
+Return a JSON array with 3-5 places:
 
 [
   {{
-    "name": "{search_term.title()} near {area}",
-    "address": "{area} area, {city}, India",
-    "phone": "",
-    "description": "Search for {search_term} in {area} area for current options and availability"
+    "name": "Real business name or general location description",
+    "address": "Complete address in {area}, {city}",
+    "phone": "+91-XXXXXXXXXX or leave empty if unknown",
+    "description": "Brief description of the place or services"
   }}
 ]
 
 RULES:
-- Use generic location-based names only
-- NO specific business names unless you're 100% certain they exist
-- Focus on area-based descriptions
-- Let users find specific businesses through maps
-- Provide general guidance rather than specific claims
+- Include phone numbers when you know them (+91 format)
+- Use real business names only if you're certain they exist
+- If unsure about specific names, use area-based descriptions like "{search_term.title()} in {area}"
+- Provide complete addresses
+- Leave phone empty if you don't know the actual number
 - Return JSON only, no additional text
 
-Search area: {area}, {city}"""
+Search area: {area}, {city}, India"""
         return prompt
     
     async def _generate_response(self, prompt: str) -> str:

@@ -140,7 +140,8 @@ function createPlaceCard(place) {
 function showLoading() {
   loading.style.display = "block";
   searchBtn.disabled = true;
-  searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting Suggestions...';
+  searchBtn.innerHTML =
+    '<i class="fas fa-spinner fa-spin"></i> Getting Suggestions...';
 }
 
 function hideLoading() {
