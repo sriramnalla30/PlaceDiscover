@@ -161,59 +161,228 @@ function hideResults() {
   results.style.display = "none";
 }
 
-// Auto-complete suggestions (basic implementation)
+// Enhanced Auto-complete with expanded city and area data
 const popularCities = [
-  "Bengaluru",
-  "Mumbai",
-  "Delhi",
-  "Chennai",
-  "Hyderabad",
-  "Pune",
-  "Kolkata",
-  "Ahmedabad",
-  "Jaipur",
-  "Surat",
+  "Agra", "Ahmedabad", "Ajmer", "Amritsar", "Aurangabad",
+  "Bengaluru", "Bhopal", "Bhubaneswar", "Chandigarh", "Chennai", 
+  "Coimbatore", "Cuttack", "Dehradun", "Delhi", "Faridabad",
+  "Ghaziabad", "Goa", "Gurgaon", "Guwahati", "Hyderabad",
+  "Indore", "Jaipur", "Jalandhar", "Jammu", "Jodhpur",
+  "Kanpur", "Kochi", "Kolkata", "Lucknow", "Ludhiana",
+  "Madurai", "Mangalore", "Mumbai", "Mysore", "Nagpur",
+  "Nashik", "Noida", "Patna", "Pune", "Raipur",
+  "Rajkot", "Ranchi", "Salem", "Surat", "Thiruvananthapuram",
+  "Thrissur", "Tirupati", "Udaipur", "Vadodara", "Varanasi",
+  "Vijayawada", "Visakhapatnam", "Warangal"
 ];
 
 const popularAreas = {
-  bengaluru: [
-    "Koramangala",
-    "Indiranagar",
-    "Whitefield",
-    "Electronic City",
-    "Marathahalli",
-  ],
-  mumbai: ["Bandra", "Andheri", "Powai", "Lower Parel", "Worli"],
-  delhi: ["Connaught Place", "Karol Bagh", "Lajpat Nagar", "Saket", "Dwarka"],
-  chennai: ["T Nagar", "Anna Nagar", "Velachery", "Adyar", "Tambaram"],
-  hyderabad: [
-    "Banjara Hills",
-    "Jubilee Hills",
-    "Gachibowli",
-    "Kondapur",
-    "Madhapur",
-  ],
+  bengaluru: ["Koramangala", "Indiranagar", "Whitefield", "Electronic City", "Marathahalli", "HSR Layout", "BTM Layout", "Jayanagar", "Rajajinagar", "Malleswaram"],
+  mumbai: ["Bandra", "Andheri", "Powai", "Lower Parel", "Worli", "Juhu", "Colaba", "Fort", "Dadar", "Thane"],
+  delhi: ["Connaught Place", "Karol Bagh", "Lajpat Nagar", "Saket", "Dwarka", "Rohini", "Vasant Kunj", "Greater Kailash", "Nehru Place", "Chandni Chowk"],
+  chennai: ["T Nagar", "Anna Nagar", "Velachery", "Adyar", "Tambaram", "Mylapore", "Nungambakkam", "Guindy", "OMR", "ECR"],
+  hyderabad: ["Banjara Hills", "Jubilee Hills", "Gachibowli", "Kondapur", "Madhapur", "Hitech City", "Secunderabad", "Begumpet", "Ameerpet", "Kukatpally"],
+  pune: ["Koregaon Park", "Hinjewadi", "Baner", "Wakad", "Viman Nagar", "Kothrud", "Shivaji Nagar", "Camp", "Magarpatta", "Hadapsar"],
+  kolkata: ["Salt Lake", "Park Street", "Ballygunge", "New Town", "Howrah", "Esplanade", "Gariahat", "Dumdum", "Jadavpur", "Tollygunge"],
+  ahmedabad: ["Satellite", "Vastrapur", "Bopal", "Prahlad Nagar", "CG Road", "Navrangpura", "Maninagar", "Iscon", "SG Highway", "Ashram Road"],
+  jaipur: ["Malviya Nagar", "Vaishali Nagar", "Mansarovar", "C Scheme", "Tonk Road", "MI Road", "Jagatpura", "Sodala", "Civil Lines", "Raja Park"],
+  surat: ["Adajan", "Vesu", "Pal", "Athwa", "Magdalla", "Piplod", "Citylight", "Rander", "Katargam", "Udhna"],
+  vijayawada: ["Benz Circle", "Auto Nagar", "Governorpet", "Labbipet", "Patamata", "Tadepalli", "Gunadala", "Krishna Lanka", "Ring Road", "PVP Square"],
+  visakhapatnam: ["MVP Colony", "Dwaraka Nagar", "Gajuwaka", "Madhurawada", "Rushikonda", "Beach Road", "Siripuram", "PM Palem", "Kommadi", "Pendurthi"]
 };
 
-// Simple autocomplete for city
-cityInput.addEventListener("input", function () {
-  const value = this.value.toLowerCase();
-  // You can implement a dropdown with suggestions here
-  console.log("City suggestions for:", value);
+// Get DOM elements for dropdowns
+const cityDropdown = document.getElementById('cityDropdown');
+const areaDropdown = document.getElementById('areaDropdown');
+
+// City autocomplete functionality
+cityInput.addEventListener('input', function() {
+  const value = this.value.toLowerCase().trim();
+  
+  if (value.length === 0) {
+    hideCityDropdown();
+    return;
+  }
+  
+  const filteredCities = popularCities.filter(city => 
+    city.toLowerCase().startsWith(value)
+  );
+  
+  showCityDropdown(filteredCities, value);
+  
+  // Clear area suggestions when city changes
+  areaInput.value = '';
+  hideAreaDropdown();
 });
 
-// Update area suggestions based on city
-cityInput.addEventListener("blur", function () {
-  const city = this.value.toLowerCase();
-  if (popularAreas[city]) {
-    // You can update area suggestions here
-    console.log("Area suggestions for", city, ":", popularAreas[city]);
+// Area autocomplete functionality
+areaInput.addEventListener('input', function() {
+  const value = this.value.toLowerCase().trim();
+  const selectedCity = cityInput.value.toLowerCase().trim();
+  
+  if (value.length === 0) {
+    hideAreaDropdown();
+    return;
+  }
+  
+  const cityAreas = popularAreas[selectedCity] || [];
+  const filteredAreas = cityAreas.filter(area => 
+    area.toLowerCase().startsWith(value)
+  );
+  
+  showAreaDropdown(filteredAreas, value);
+});
+
+// Show city dropdown
+function showCityDropdown(cities, searchValue) {
+  cityDropdown.innerHTML = '';
+  cityDropdown.style.display = 'block';
+  
+  if (cities.length === 0) {
+    const noResults = document.createElement('div');
+    noResults.className = 'autocomplete-item no-results';
+    noResults.textContent = 'No cities found';
+    cityDropdown.appendChild(noResults);
+    return;
+  }
+  
+  cities.slice(0, 8).forEach(city => { // Limit to 8 suggestions
+    const item = document.createElement('div');
+    item.className = 'autocomplete-item';
+    item.textContent = city;
+    
+    item.addEventListener('click', function() {
+      cityInput.value = city;
+      hideCityDropdown();
+      cityInput.focus();
+      
+      // Update area suggestions for selected city
+      updateAreaSuggestions(city.toLowerCase());
+    });
+    
+    cityDropdown.appendChild(item);
+  });
+}
+
+// Show area dropdown
+function showAreaDropdown(areas, searchValue) {
+  areaDropdown.innerHTML = '';
+  areaDropdown.style.display = 'block';
+  
+  if (areas.length === 0) {
+    const noResults = document.createElement('div');
+    noResults.className = 'autocomplete-item no-results';
+    noResults.textContent = 'No areas found for this city';
+    areaDropdown.appendChild(noResults);
+    return;
+  }
+  
+  areas.slice(0, 8).forEach(area => { // Limit to 8 suggestions
+    const item = document.createElement('div');
+    item.className = 'autocomplete-item';
+    item.textContent = area;
+    
+    item.addEventListener('click', function() {
+      areaInput.value = area;
+      hideAreaDropdown();
+      areaInput.focus();
+    });
+    
+    areaDropdown.appendChild(item);
+  });
+}
+
+// Hide dropdowns
+function hideCityDropdown() {
+  cityDropdown.style.display = 'none';
+}
+
+function hideAreaDropdown() {
+  areaDropdown.style.display = 'none';
+}
+
+// Update area suggestions when city is selected
+function updateAreaSuggestions(city) {
+  const areas = popularAreas[city];
+  if (areas) {
+    // Show placeholder in area input
+    areaInput.placeholder = `e.g., ${areas[0]}`;
+  }
+}
+
+// Hide dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  if (!cityInput.contains(e.target) && !cityDropdown.contains(e.target)) {
+    hideCityDropdown();
+  }
+  if (!areaInput.contains(e.target) && !areaDropdown.contains(e.target)) {
+    hideAreaDropdown();
   }
 });
 
+// Keyboard navigation for dropdowns
+cityInput.addEventListener('keydown', handleCityKeyboard);
+areaInput.addEventListener('keydown', handleAreaKeyboard);
+
+function handleCityKeyboard(e) {
+  const items = cityDropdown.querySelectorAll('.autocomplete-item:not(.no-results)');
+  const highlighted = cityDropdown.querySelector('.autocomplete-item.highlighted');
+  
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    const next = highlighted ? highlighted.nextElementSibling : items[0];
+    if (next && !next.classList.contains('no-results')) {
+      if (highlighted) highlighted.classList.remove('highlighted');
+      next.classList.add('highlighted');
+    }
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    const prev = highlighted ? highlighted.previousElementSibling : items[items.length - 1];
+    if (prev && !prev.classList.contains('no-results')) {
+      if (highlighted) highlighted.classList.remove('highlighted');
+      prev.classList.add('highlighted');
+    }
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (highlighted) {
+      highlighted.click();
+    }
+  } else if (e.key === 'Escape') {
+    hideCityDropdown();
+  }
+}
+
+function handleAreaKeyboard(e) {
+  const items = areaDropdown.querySelectorAll('.autocomplete-item:not(.no-results)');
+  const highlighted = areaDropdown.querySelector('.autocomplete-item.highlighted');
+  
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    const next = highlighted ? highlighted.nextElementSibling : items[0];
+    if (next && !next.classList.contains('no-results')) {
+      if (highlighted) highlighted.classList.remove('highlighted');
+      next.classList.add('highlighted');
+    }
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    const prev = highlighted ? highlighted.previousElementSibling : items[items.length - 1];
+    if (prev && !prev.classList.contains('no-results')) {
+      if (highlighted) highlighted.classList.remove('highlighted');
+      prev.classList.add('highlighted');
+    }
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (highlighted) {
+      highlighted.click();
+    }
+  } else if (e.key === 'Escape') {
+    hideAreaDropdown();
+  }
+}
+
 // Initialize the app
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("AI Place Search App initialized");
+  console.log("Place Search App initialized");
 
   // Focus on city input
   cityInput.focus();
