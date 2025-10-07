@@ -48,30 +48,28 @@ class GeminiService:
             search_term = place_type
             place_description = place_type
             
-        prompt = f"""Find {search_term} locations in {area}, {city}, India with contact information.
+        prompt = f"""Find popular and well-known {search_term} in {area}, {city}, India.
 
-IMPORTANT: Provide real, verifiable places with phone numbers when possible.
-
-Return a JSON array with 3-5 places:
+Provide 4-6 real places with complete details:
 
 [
   {{
-    "name": "Real business name or general location description",
-    "address": "Complete address in {area}, {city}",
-    "phone": "+91-XXXXXXXXXX or leave empty if unknown",
-    "description": "Brief description of the place or services"
+    "name": "Actual business name (e.g., Gold's Gym, Anytime Fitness, Cult.fit)",
+    "address": "Complete street address, {area}, {city}, India",
+    "phone": "+91-XXXXXXXXXX",
+    "description": "Brief description of facilities/services"
   }}
 ]
 
-RULES:
-- Include phone numbers when you know them (+91 format)
-- Use real business names only if you're certain they exist
-- If unsure about specific names, use area-based descriptions like "{search_term.title()} in {area}"
-- Provide complete addresses
-- Leave phone empty if you don't know the actual number
+REQUIREMENTS:
+- Use real, popular business names that exist in {area}, {city}
+- Include actual phone numbers in +91 format
+- Provide complete street addresses
+- Focus on well-known chains and established local businesses
 - Return JSON only, no additional text
 
-Search area: {area}, {city}, India"""
+Location: {area}, {city}, India
+Type: {search_term}"""
         return prompt
     
     async def _generate_response(self, prompt: str) -> str:

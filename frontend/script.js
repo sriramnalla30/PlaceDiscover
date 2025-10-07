@@ -92,8 +92,8 @@ function createPlaceCard(place) {
   const card = document.createElement("div");
   card.className = "place-card";
 
-  // Create Google Maps search for the specific place
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  // Create Google Maps directions URL for the specific place
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
     place.name + " " + place.address
   )}`;
   const phoneUrl = place.phone ? `tel:${place.phone}` : null;
@@ -119,7 +119,7 @@ function createPlaceCard(place) {
         }
         <div class="place-actions">
             <a href="${mapsUrl}" target="_blank" class="action-btn maps-btn">
-                <i class="fas fa-map"></i> View on Maps
+                <i class="fas fa-directions"></i> Get Directions
             </a>
             ${
               phoneUrl
