@@ -38,7 +38,7 @@ class GeminiService:
     
     def _create_search_prompt(self, city: str, area: str, place_type: str) -> str:
         """
-        Create a structured prompt for Gemini AI
+        Create a structured prompt for Gemini AI with strict accuracy requirements
         """
         # Handle PG-specific searches
         if 'pg' in place_type.lower() or 'paying_guest' in place_type.lower():
@@ -48,26 +48,35 @@ class GeminiService:
             search_term = place_type
             place_description = place_type
             
-        prompt = f"""Find popular {search_term} in {area}, {city}. Return a JSON array with 5 places.
+        prompt = f"""You are a local directory assistant. Find ONLY real, currently operating {search_term} in {area}, {city}, India.
 
-Example format:
+CRITICAL REQUIREMENTS:
+1. ONLY provide places that actually exist and are currently operational
+2. DO NOT create fictional names or combine business names incorrectly
+3. Verify each place name is accurate and real
+4. If you're not 100% certain a place exists, DO NOT include it
+5. Provide fewer results rather than inaccurate ones
+
+Return a JSON array with 3-5 VERIFIED places:
+
 [
   {{
-    "name": "Sri Sai PG for Men",
-    "address": "123 Main Road, {area}, {city}",
-    "phone": "+91-9876543210",
-    "description": "Safe and affordable {place_description}"
+    "name": "Exact Real Business Name",
+    "address": "Complete real street address, {area}, {city}",
+    "phone": "+91-XXXXXXXXXX",
+    "description": "Brief accurate description"
   }}
 ]
 
-Requirements:
-- Real places only  
-- Include name, address, phone, description
-- JSON format only
-- No markdown or extra text
-- For PG searches, focus on paying guest accommodations
+STRICT RULES:
+- Use exact business names (e.g., "Gold's Gym", "Anytime Fitness", not made-up names)
+- Real street addresses only
+- Verified phone numbers when available
+- NO fictional or merged business names
+- If unsure about a place, skip it
+- Return JSON only, no additional text
 
-Search: {search_term} in {area}, {city}"""
+Search for: Real {search_term} in {area}, {city}, India"""
         return prompt
     
     async def _generate_response(self, prompt: str) -> str:
@@ -112,8 +121,8 @@ Search: {search_term} in {area}, {city}"""
                         'description': place_data.get('description', '').strip()
                     }
                     
-                    # Only add places with valid name and address
-                    if place['name'] and place['address']:
+                    # Validate place data quality
+                    if self._is_valid_place(place):
                         places.append(place)
             
             return places
@@ -146,6 +155,42 @@ Search: {search_term} in {area}, {city}"""
         
         return phone  # Return original if can't clean
     
+    def _is_valid_place(self, place: Dict[str, Any]) -> bool:
+        """
+        Validate place data for quality and authenticity
+        """
+        name = place.get('name', '').strip()
+        address = place.get('address', '').strip()
+        
+        # Basic validation
+        if not name or not address:
+            return False
+        
+        # Filter out obviously fake or suspicious names
+        suspicious_patterns = [
+            'example', 'sample', 'test', 'demo', 'placeholder',
+            'fake', 'dummy', 'xyz', 'abc', 'lorem ipsum'
+        ]
+        
+        name_lower = name.lower()
+        for pattern in suspicious_patterns:
+            if pattern in name_lower:
+                return False
+        
+        # Address should contain the expected city/area
+        address_lower = address.lower()
+        
+        # Very basic name validation - should not be too generic
+        if len(name) < 3 or name.isdigit():
+            return False
+            
+        # Name should not have excessive special characters
+        special_char_count = sum(1 for char in name if not char.isalnum() and char not in [' ', '-', '.', '&', "'"])
+        if special_char_count > 3:
+            return False
+            
+        return True
+    
     def _create_fallback_response(self) -> List[Dict[str, Any]]:
         """
         Create fallback response when AI parsing fails
@@ -155,6 +200,6 @@ Search: {search_term} in {area}, {city}"""
                 "name": "Search results temporarily unavailable",
                 "address": "Please try again in a moment",
                 "phone": "",
-                "description": "AI service is processing your request"
+                "description": "Service is processing your request"
             }
         ]
