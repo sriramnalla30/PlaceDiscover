@@ -16,10 +16,6 @@ const errorText = document.getElementById("errorText");
 // Event Listeners
 searchBtn.addEventListener("click", handleSearch);
 
-// Add Maps button functionality
-const mapsBtn = document.getElementById("mapsBtn");
-mapsBtn.addEventListener("click", handleDirectMapsSearch);
-
 // Allow Enter key to trigger search
 [cityInput, areaInput, typeSelect].forEach((element) => {
   element.addEventListener("keypress", (e) => {
@@ -28,27 +24,6 @@ mapsBtn.addEventListener("click", handleDirectMapsSearch);
     }
   });
 });
-
-// Direct Maps search function
-function handleDirectMapsSearch() {
-  const city = cityInput.value.trim();
-  const area = areaInput.value.trim();
-  const type = typeSelect.value;
-
-  // Validation
-  if (!city || !area || !type) {
-    showError("Please fill in all fields");
-    return;
-  }
-
-  // Create direct Google Maps search URL
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${type} in ${area} ${city}`
-  )}`;
-  
-  // Open in new tab
-  window.open(mapsUrl, '_blank');
-}
 
 // Main search function
 async function handleSearch() {
@@ -117,12 +92,9 @@ function createPlaceCard(place) {
   const card = document.createElement("div");
   card.className = "place-card";
 
-  // Create Google Maps search for the category + location instead of specific business name
-  const city = cityInput.value;
-  const area = areaInput.value;
-  const type = typeSelect.value;
+  // Create Google Maps search for the specific place
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${type} in ${area} ${city}`
+    place.name + " " + place.address
   )}`;
   const phoneUrl = place.phone ? `tel:${place.phone}` : null;
 
@@ -147,7 +119,7 @@ function createPlaceCard(place) {
         }
         <div class="place-actions">
             <a href="${mapsUrl}" target="_blank" class="action-btn maps-btn">
-                <i class="fas fa-map"></i> Find ${type} on Maps
+                <i class="fas fa-map"></i> View on Maps
             </a>
             ${
               phoneUrl
