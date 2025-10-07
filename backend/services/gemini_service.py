@@ -48,35 +48,30 @@ class GeminiService:
             search_term = place_type
             place_description = place_type
             
-        prompt = f"""You are a local directory assistant. Find ONLY real, currently operating {search_term} in {area}, {city}, India.
+        prompt = f"""Find general information about {search_term} locations in {area}, {city}, India.
 
-CRITICAL REQUIREMENTS:
-1. ONLY provide places that actually exist and are currently operational
-2. DO NOT create fictional names or combine business names incorrectly
-3. Verify each place name is accurate and real
-4. If you're not 100% certain a place exists, DO NOT include it
-5. Provide fewer results rather than inaccurate ones
+IMPORTANT: Instead of guessing specific business names, provide general location-based results.
 
-Return a JSON array with 3-5 VERIFIED places:
+Return a JSON array with 2-3 general location suggestions:
 
 [
   {{
-    "name": "Exact Real Business Name",
-    "address": "Complete real street address, {area}, {city}",
-    "phone": "+91-XXXXXXXXXX",
-    "description": "Brief accurate description"
+    "name": "{search_term.title()} near {area}",
+    "address": "{area} area, {city}, India",
+    "phone": "",
+    "description": "Search for {search_term} in {area} area for current options and availability"
   }}
 ]
 
-STRICT RULES:
-- Use exact business names (e.g., "Gold's Gym", "Anytime Fitness", not made-up names)
-- Real street addresses only
-- Verified phone numbers when available
-- NO fictional or merged business names
-- If unsure about a place, skip it
+RULES:
+- Use generic location-based names only
+- NO specific business names unless you're 100% certain they exist
+- Focus on area-based descriptions
+- Let users find specific businesses through maps
+- Provide general guidance rather than specific claims
 - Return JSON only, no additional text
 
-Search for: Real {search_term} in {area}, {city}, India"""
+Search area: {area}, {city}"""
         return prompt
     
     async def _generate_response(self, prompt: str) -> str:
