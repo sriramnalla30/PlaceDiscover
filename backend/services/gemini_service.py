@@ -25,42 +25,20 @@ class GeminiService:
         try:
             # Step 1: Get initial results
             prompt = self._create_search_prompt(city, area, place_type)
-            print(f"\n{'='*50}")
-            print(f"🔍 STEP 1: INITIAL SEARCH REQUEST:")
-            print(f"City: {city}")
-            print(f"Area: {area}")
-            print(f"Type: {place_type}")
-            print(f"\n📝 FULL PROMPT SENT TO GEMINI:")
-            print(prompt)
-            print(f"{'='*50}")
+            print(f"🔍 Searching for {place_type} in {area}, {city}...")
             
             response = await self._generate_response(prompt)
             
-            print(f"\n🤖 RAW GEMINI RESPONSE:")
-            print(f"Response length: {len(response)} characters")
-            print(f"Full response: {response}")
-            print(f"{'='*50}")
-            
             initial_places = self._parse_response(response)
             
-            print(f"\n✅ INITIAL RESULTS PARSED:")
-            print(f"Places found: {len(initial_places)}")
-            for i, place in enumerate(initial_places):
-                print(f"Place {i+1}: {place.get('name', 'NO NAME')}")
+            print(f"📋 Found {len(initial_places)} initial results, validating...")
             
             # Step 2: Validate each place exists
-            print(f"\n🔍 STEP 2: VALIDATING EACH PLACE...")
             validated_places = await self._validate_places(initial_places, city, area, place_type)
             
-            print(f"\n✅ FINAL VALIDATED RESULTS:")
-            print(f"Valid places: {len(validated_places)}")
+            print(f"🎯 Final result: {len(validated_places)} verified places")
             for i, place in enumerate(validated_places):
-                print(f"Validated Place {i+1}:")
-                print(f"  Name: {place.get('name', 'NO NAME')}")
-                print(f"  Address: {place.get('address', 'NO ADDRESS')}")
-                print(f"  Phone: {place.get('phone', 'NO PHONE')}")
-                print(f"  Validation: {place.get('validation_status', 'UNKNOWN')}")
-            print(f"{'='*50}\n")
+                print(f"   {i+1}. {place.get('name')} - {place.get('phone', 'No phone')}")
             
             return validated_places
         except Exception as e:
@@ -112,7 +90,7 @@ Type: {search_term}"""
         validated_places = []
         
         for i, place in enumerate(places):
-            print(f"\n🔍 Validating Place {i+1}: {place.get('name', 'Unknown')}")
+            print(f"🔍 Validating: {place.get('name', 'Unknown')}")
             
             validation_prompt = f"""CRITICAL BUSINESS VERIFICATION TASK
 You are a fact-checker verifying if this business ACTUALLY EXISTS in the real world.
@@ -175,7 +153,6 @@ REMEMBER: Your job is to REJECT questionable businesses. Only approve if you hav
 
             try:
                 validation_response = await self._generate_response(validation_prompt)
-                print(f"🤖 Validation response: {validation_response}")
                 
                 # Parse validation response
                 validation_result = self._parse_validation_response(validation_response)
@@ -185,12 +162,6 @@ REMEMBER: Your job is to REJECT questionable businesses. Only approve if you hav
                 confidence = validation_result.get('confidence', '').lower()
                 sources = validation_result.get('verification_sources', [])
                 inconsistencies = validation_result.get('inconsistencies', [])
-                
-                print(f"📊 Validation Results:")
-                print(f"   Exists: {exists}")
-                print(f"   Confidence: {confidence}")
-                print(f"   Sources: {sources}")
-                print(f"   Inconsistencies: {inconsistencies}")
                 
                 # Only accept if:
                 # 1. exists = true
@@ -202,26 +173,25 @@ REMEMBER: Your job is to REJECT questionable businesses. Only approve if you hav
                     len(sources) >= 2 and 
                     len(inconsistencies) == 0):
                     
-                    # Place passed strict validation
+                    # Place passed strict validation - use corrected values only if they exist and are not null
+                    corrected_name = validation_result.get('corrected_name')
+                    corrected_address = validation_result.get('corrected_address') 
+                    corrected_phone = validation_result.get('corrected_phone')
+                    
                     validated_place = {
-                        'name': validation_result.get('corrected_name', place.get('name', '')),
-                        'address': validation_result.get('corrected_address', place.get('address', '')),
-                        'phone': validation_result.get('corrected_phone', place.get('phone', '')),
+                        'name': corrected_name if corrected_name and corrected_name.strip() else place.get('name', ''),
+                        'address': corrected_address if corrected_address and corrected_address.strip() else place.get('address', ''),
+                        'phone': corrected_phone if corrected_phone and corrected_phone.strip() else place.get('phone', ''),
                         'description': place.get('description', ''),
                         'validation_status': f"✅ VERIFIED ({len(sources)} sources, high confidence)",
                         'validation_reason': validation_result.get('reason', 'No reason provided'),
                         'verification_sources': sources
                     }
                     validated_places.append(validated_place)
-                    print(f"✅ PASSED STRICT VALIDATION: {place.get('name')}")
-                    print(f"   Sources: {', '.join(sources)}")
+                    print(f"✅ VERIFIED: {validated_place['name']} ({len(sources)} sources)")
                     
                 else:
-                    print(f"❌ FAILED STRICT VALIDATION: {place.get('name')}")
-                    print(f"   Reason: {validation_result.get('reason', 'Unknown')}")
-                    if inconsistencies:
-                        print(f"   Issues: {', '.join(inconsistencies)}")
-                    print(f"   Rejected due to: exists={exists}, confidence={confidence}, sources={len(sources)}, issues={len(inconsistencies)}")
+                    print(f"❌ REJECTED: {place.get('name')} - {validation_result.get('reason', 'Failed validation')[:50]}...")
                     
             except Exception as e:
                 print(f"❌ Validation error for {place.get('name', 'Unknown')}: {e}")
@@ -273,31 +243,20 @@ REMEMBER: Your job is to REJECT questionable businesses. Only approve if you hav
         Parse Gemini response into structured place data
         """
         try:
-            print(f"\n🔧 PARSING GEMINI RESPONSE:")
-            print(f"Original response length: {len(response)}")
-            
             # Clean the response - remove markdown formatting if present
             cleaned_response = response.strip()
-            print(f"After strip: '{cleaned_response[:100]}...'")
             
             if cleaned_response.startswith('```json'):
                 cleaned_response = re.sub(r'^```json\s*', '', cleaned_response)
-                print("Removed ```json prefix")
             if cleaned_response.endswith('```'):
                 cleaned_response = re.sub(r'\s*```$', '', cleaned_response)
-                print("Removed ``` suffix")
-                
-            print(f"Final cleaned response: {cleaned_response}")
             
             # Parse JSON
-            print(f"Attempting to parse JSON...")
             places_data = json.loads(cleaned_response)
-            print(f"JSON parsed successfully! Type: {type(places_data)}, Items: {len(places_data) if isinstance(places_data, list) else 'Not a list'}")
             
             # Validate and clean data
             places = []
             for i, place_data in enumerate(places_data[:8]):  # Limit to 8 places
-                print(f"\nProcessing place {i+1}: {place_data}")
                 if isinstance(place_data, dict) and 'name' in place_data:
                     place = {
                         'name': place_data.get('name', '').strip(),
@@ -306,18 +265,10 @@ REMEMBER: Your job is to REJECT questionable businesses. Only approve if you hav
                         'description': place_data.get('description', '').strip()
                     }
                     
-                    print(f"Created place object: {place}")
-                    
                     # Validate place data quality
                     if self._is_valid_place(place):
                         places.append(place)
-                        print(f"✅ Place {i+1} is valid and added")
-                    else:
-                        print(f"❌ Place {i+1} failed validation")
-                else:
-                    print(f"❌ Place {i+1} is not a valid dict or missing name")
             
-            print(f"Final places list: {len(places)} valid places")
             return places
             
         except json.JSONDecodeError as e:
