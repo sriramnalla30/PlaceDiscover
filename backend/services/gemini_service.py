@@ -20,12 +20,13 @@ class GeminiService:
     
     async def search_places(self, city: str, area: str, place_type: str) -> List[Dict[str, Any]]:
         """
-        Search for places using Gemini AI
+        Search for places using Gemini AI with two-step validation
         """
         try:
+            # Step 1: Get initial results
             prompt = self._create_search_prompt(city, area, place_type)
             print(f"\n{'='*50}")
-            print(f"🔍 SEARCH REQUEST:")
+            print(f"🔍 STEP 1: INITIAL SEARCH REQUEST:")
             print(f"City: {city}")
             print(f"Area: {area}")
             print(f"Type: {place_type}")
@@ -40,19 +41,28 @@ class GeminiService:
             print(f"Full response: {response}")
             print(f"{'='*50}")
             
-            places = self._parse_response(response)
+            initial_places = self._parse_response(response)
             
-            print(f"\n✅ PARSED RESULTS:")
-            print(f"Places found: {len(places)}")
-            for i, place in enumerate(places):
-                print(f"Place {i+1}:")
+            print(f"\n✅ INITIAL RESULTS PARSED:")
+            print(f"Places found: {len(initial_places)}")
+            for i, place in enumerate(initial_places):
+                print(f"Place {i+1}: {place.get('name', 'NO NAME')}")
+            
+            # Step 2: Validate each place exists
+            print(f"\n🔍 STEP 2: VALIDATING EACH PLACE...")
+            validated_places = await self._validate_places(initial_places, city, area, place_type)
+            
+            print(f"\n✅ FINAL VALIDATED RESULTS:")
+            print(f"Valid places: {len(validated_places)}")
+            for i, place in enumerate(validated_places):
+                print(f"Validated Place {i+1}:")
                 print(f"  Name: {place.get('name', 'NO NAME')}")
                 print(f"  Address: {place.get('address', 'NO ADDRESS')}")
                 print(f"  Phone: {place.get('phone', 'NO PHONE')}")
-                print(f"  Description: {place.get('description', 'NO DESCRIPTION')}")
+                print(f"  Validation: {place.get('validation_status', 'UNKNOWN')}")
             print(f"{'='*50}\n")
             
-            return places
+            return validated_places
         except Exception as e:
             print(f"❌ ERROR in Gemini search: {e}")
             import traceback
@@ -94,6 +104,153 @@ REQUIREMENTS:
 Location: {area}, {city}, India
 Type: {search_term}"""
         return prompt
+    
+    async def _validate_places(self, places: List[Dict[str, Any]], city: str, area: str, place_type: str) -> List[Dict[str, Any]]:
+        """
+        Validate each place by asking Gemini if it actually exists
+        """
+        validated_places = []
+        
+        for i, place in enumerate(places):
+            print(f"\n🔍 Validating Place {i+1}: {place.get('name', 'Unknown')}")
+            
+            validation_prompt = f"""CRITICAL BUSINESS VERIFICATION TASK
+You are a fact-checker verifying if this business ACTUALLY EXISTS in the real world.
+
+BUSINESS DETAILS TO VERIFY:
+- Name: {place.get('name', 'Unknown')}
+- Address: {place.get('address', 'Unknown')}
+- Phone: {place.get('phone', 'Unknown')}
+- Type: {place_type}
+- Location: {area}, {city}, India
+
+MANDATORY VERIFICATION STEPS:
+You must check ALL of these sources and be EXTREMELY STRICT:
+
+1. **Google Maps Verification**: 
+   - Is this exact business name listed on Google Maps at this address?
+   - Does the address actually exist in {area}, {city}?
+   - Are there recent reviews (within last 6 months)?
+
+2. **Official Website/Company Verification**:
+   - Does the company's official website list this specific location?
+   - For chains (Gold's Gym, Cult.fit, F45, etc.), check their official store locator
+
+3. **Phone Number Verification**:
+   - Is this phone number actually associated with this specific business?
+   - Does calling this number reach this business? (based on online listings)
+
+4. **Multiple Directory Verification**:
+   - Is it listed on Justdial, Sulekha, or other Indian business directories?
+   - Are the details consistent across multiple sources?
+
+5. **Local Knowledge Check**:
+   - Does this business make sense for {area}, {city}?
+   - Is the address format and area name correct for this city?
+
+6. **Recent Activity Verification**:
+   - Are there recent reviews, social media posts, or activity?
+   - Is there evidence it's currently operational (not permanently closed)?
+
+CRITICAL RULES:
+- If you find ANY inconsistency or cannot verify through multiple sources, mark as "exists": false
+- Only mark "exists": true if you can verify through AT LEAST 3 different reliable sources
+- Be EXTREMELY CONSERVATIVE - it's better to reject 10 real businesses than include 1 fake one
+- If the business name seems like a made-up combination, mark as false
+- If you cannot find recent evidence of operation, mark as false
+
+RETURN FORMAT (JSON only):
+{{
+  "exists": true/false,
+  "confidence": "high/medium/low",
+  "verification_sources": ["List of sources where you found this business"],
+  "inconsistencies": ["List any inconsistencies found"],
+  "reason": "Detailed explanation with evidence from multiple sources",
+  "corrected_name": "Actual name if different",
+  "corrected_address": "Actual address if different", 
+  "corrected_phone": "Actual phone if different"
+}}
+
+REMEMBER: Your job is to REJECT questionable businesses. Only approve if you have SOLID EVIDENCE from multiple sources."""
+
+            try:
+                validation_response = await self._generate_response(validation_prompt)
+                print(f"🤖 Validation response: {validation_response}")
+                
+                # Parse validation response
+                validation_result = self._parse_validation_response(validation_response)
+                
+                # STRICT VALIDATION CRITERIA
+                exists = validation_result.get('exists', False)
+                confidence = validation_result.get('confidence', '').lower()
+                sources = validation_result.get('verification_sources', [])
+                inconsistencies = validation_result.get('inconsistencies', [])
+                
+                print(f"📊 Validation Results:")
+                print(f"   Exists: {exists}")
+                print(f"   Confidence: {confidence}")
+                print(f"   Sources: {sources}")
+                print(f"   Inconsistencies: {inconsistencies}")
+                
+                # Only accept if:
+                # 1. exists = true
+                # 2. confidence = high (no medium or low accepted)
+                # 3. At least 2 verification sources
+                # 4. No major inconsistencies
+                if (exists and 
+                    confidence == 'high' and 
+                    len(sources) >= 2 and 
+                    len(inconsistencies) == 0):
+                    
+                    # Place passed strict validation
+                    validated_place = {
+                        'name': validation_result.get('corrected_name', place.get('name', '')),
+                        'address': validation_result.get('corrected_address', place.get('address', '')),
+                        'phone': validation_result.get('corrected_phone', place.get('phone', '')),
+                        'description': place.get('description', ''),
+                        'validation_status': f"✅ VERIFIED ({len(sources)} sources, high confidence)",
+                        'validation_reason': validation_result.get('reason', 'No reason provided'),
+                        'verification_sources': sources
+                    }
+                    validated_places.append(validated_place)
+                    print(f"✅ PASSED STRICT VALIDATION: {place.get('name')}")
+                    print(f"   Sources: {', '.join(sources)}")
+                    
+                else:
+                    print(f"❌ FAILED STRICT VALIDATION: {place.get('name')}")
+                    print(f"   Reason: {validation_result.get('reason', 'Unknown')}")
+                    if inconsistencies:
+                        print(f"   Issues: {', '.join(inconsistencies)}")
+                    print(f"   Rejected due to: exists={exists}, confidence={confidence}, sources={len(sources)}, issues={len(inconsistencies)}")
+                    
+            except Exception as e:
+                print(f"❌ Validation error for {place.get('name', 'Unknown')}: {e}")
+                # If validation fails, exclude the place to be safe
+                continue
+        
+        return validated_places
+    
+    def _parse_validation_response(self, response: str) -> Dict[str, Any]:
+        """
+        Parse validation response from Gemini
+        """
+        try:
+            # Clean the response
+            cleaned_response = response.strip()
+            if cleaned_response.startswith('```json'):
+                cleaned_response = re.sub(r'^```json\s*', '', cleaned_response)
+            if cleaned_response.endswith('```'):
+                cleaned_response = re.sub(r'\s*```$', '', cleaned_response)
+            
+            validation_data = json.loads(cleaned_response)
+            return validation_data
+            
+        except json.JSONDecodeError as e:
+            print(f"❌ Validation JSON parse error: {e}")
+            return {'exists': False, 'confidence': 'low', 'reason': 'Failed to parse validation response'}
+        except Exception as e:
+            print(f"❌ Validation parse error: {e}")
+            return {'exists': False, 'confidence': 'low', 'reason': 'Validation error'}
     
     async def _generate_response(self, prompt: str) -> str:
         """
