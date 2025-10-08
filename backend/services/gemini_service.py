@@ -24,14 +24,37 @@ class GeminiService:
         """
         try:
             prompt = self._create_search_prompt(city, area, place_type)
-            print(f"Generated prompt: {prompt[:200]}...")
+            print(f"\n{'='*50}")
+            print(f"🔍 SEARCH REQUEST:")
+            print(f"City: {city}")
+            print(f"Area: {area}")
+            print(f"Type: {place_type}")
+            print(f"\n📝 FULL PROMPT SENT TO GEMINI:")
+            print(prompt)
+            print(f"{'='*50}")
+            
             response = await self._generate_response(prompt)
-            print(f"Gemini response: {response[:300]}...")
+            
+            print(f"\n🤖 RAW GEMINI RESPONSE:")
+            print(f"Response length: {len(response)} characters")
+            print(f"Full response: {response}")
+            print(f"{'='*50}")
+            
             places = self._parse_response(response)
-            print(f"Parsed places count: {len(places)}")
+            
+            print(f"\n✅ PARSED RESULTS:")
+            print(f"Places found: {len(places)}")
+            for i, place in enumerate(places):
+                print(f"Place {i+1}:")
+                print(f"  Name: {place.get('name', 'NO NAME')}")
+                print(f"  Address: {place.get('address', 'NO ADDRESS')}")
+                print(f"  Phone: {place.get('phone', 'NO PHONE')}")
+                print(f"  Description: {place.get('description', 'NO DESCRIPTION')}")
+            print(f"{'='*50}\n")
+            
             return places
         except Exception as e:
-            print(f"Error in Gemini search: {e}")
+            print(f"❌ ERROR in Gemini search: {e}")
             import traceback
             traceback.print_exc()
             return []
@@ -93,19 +116,31 @@ Type: {search_term}"""
         Parse Gemini response into structured place data
         """
         try:
+            print(f"\n🔧 PARSING GEMINI RESPONSE:")
+            print(f"Original response length: {len(response)}")
+            
             # Clean the response - remove markdown formatting if present
             cleaned_response = response.strip()
+            print(f"After strip: '{cleaned_response[:100]}...'")
+            
             if cleaned_response.startswith('```json'):
                 cleaned_response = re.sub(r'^```json\s*', '', cleaned_response)
+                print("Removed ```json prefix")
             if cleaned_response.endswith('```'):
                 cleaned_response = re.sub(r'\s*```$', '', cleaned_response)
+                print("Removed ``` suffix")
+                
+            print(f"Final cleaned response: {cleaned_response}")
             
             # Parse JSON
+            print(f"Attempting to parse JSON...")
             places_data = json.loads(cleaned_response)
+            print(f"JSON parsed successfully! Type: {type(places_data)}, Items: {len(places_data) if isinstance(places_data, list) else 'Not a list'}")
             
             # Validate and clean data
             places = []
-            for place_data in places_data[:8]:  # Limit to 8 places
+            for i, place_data in enumerate(places_data[:8]):  # Limit to 8 places
+                print(f"\nProcessing place {i+1}: {place_data}")
                 if isinstance(place_data, dict) and 'name' in place_data:
                     place = {
                         'name': place_data.get('name', '').strip(),
@@ -114,18 +149,28 @@ Type: {search_term}"""
                         'description': place_data.get('description', '').strip()
                     }
                     
+                    print(f"Created place object: {place}")
+                    
                     # Validate place data quality
                     if self._is_valid_place(place):
                         places.append(place)
+                        print(f"✅ Place {i+1} is valid and added")
+                    else:
+                        print(f"❌ Place {i+1} failed validation")
+                else:
+                    print(f"❌ Place {i+1} is not a valid dict or missing name")
             
+            print(f"Final places list: {len(places)} valid places")
             return places
             
         except json.JSONDecodeError as e:
-            print(f"JSON parsing error: {e}")
-            print(f"Raw response: {response}")
+            print(f"❌ JSON parsing error: {e}")
+            print(f"Raw response that failed: {response}")
             return self._create_fallback_response()
         except Exception as e:
-            print(f"Response parsing error: {e}")
+            print(f"❌ Response parsing error: {e}")
+            import traceback
+            traceback.print_exc()
             return self._create_fallback_response()
     
     def _clean_phone_number(self, phone: str) -> str:
