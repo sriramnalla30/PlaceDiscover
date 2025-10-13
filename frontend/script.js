@@ -1,6 +1,6 @@
-// Configuration - Connected to Production Backend
-// Backend deployed on Render: https://place-search-gen-ai.onrender.com
-const API_BASE_URL = "https://place-search-gen-ai.onrender.com";
+// Configuration - Connected to Local Backend for Testing
+// Using local backend with SerpStack (Real Google Data)
+const API_BASE_URL = "http://localhost:8003";
 
 // DOM Elements
 const cityInput = document.getElementById("city");
@@ -104,6 +104,20 @@ function createPlaceCard(place) {
                 <div class="place-name">${place.name}</div>
                 <div class="place-type">${place.type || typeSelect.value}</div>
             </div>
+            ${
+              place.rating
+                ? `
+                <div class="place-rating">
+                    <i class="fas fa-star"></i> ${place.rating}
+                    ${
+                      place.reviews
+                        ? `<span class="review-count">(${place.reviews} reviews)</span>`
+                        : ""
+                    }
+                </div>
+            `
+                : ""
+            }
         </div>
         <div class="place-address">
             <i class="fas fa-map-marker-alt"></i> ${place.address}
@@ -113,6 +127,15 @@ function createPlaceCard(place) {
             ? `
             <div class="place-phone">
                 <i class="fas fa-phone"></i> ${place.phone}
+            </div>
+        `
+            : ""
+        }
+        ${
+          place.source
+            ? `
+            <div class="place-source">
+                <i class="fas fa-check-circle"></i> ${place.source}
             </div>
         `
             : ""

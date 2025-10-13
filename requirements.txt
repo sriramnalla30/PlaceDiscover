@@ -1,6 +1,24 @@
-fastapi==0.115.4
+# Place Search Gen AI - Python Dependenciesfastapi==0.115.4
+
 uvicorn==0.32.0
-python-dotenv==1.0.1
-google-generativeai==0.8.3
-pydantic==2.10.2
-python-multipart==0.0.12
+
+# FastAPI Frameworkpython-dotenv==1.0.1
+
+fastapi==0.104.1google-generativeai==0.8.3
+
+uvicorn[standard]==0.24.0pydantic==2.10.2
+
+pydantic==2.5.0python-multipart==0.0.12
+
+requests==2.31.0
+# Google Generative AI (Gemini)
+google-generativeai==0.3.1
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# HTTP Requests for web verification
+requests==2.31.0
+
+# CORS Support
+python-multipart==0.0.6
