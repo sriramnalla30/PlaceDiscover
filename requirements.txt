@@ -1,11 +1,9 @@
-# Place Search Gen AI - Python Dependencies
+# Place Search - Python Dependencies
+# Real Google SERP data via SerpStack API
 
 # FastAPI Framework
 fastapi==0.115.4
 uvicorn[standard]==0.32.0
-
-# Google Generative AI (Gemini)
-google-generativeai==0.8.3
 
 # Environment Variables
 python-dotenv==1.0.1
@@ -13,8 +11,8 @@ python-dotenv==1.0.1
 # Data Validation
 pydantic==2.10.2
 
-# HTTP Requests for web verification
+# HTTP Requests for SerpStack API
 requests==2.31.0
 
-# CORS Support and File Upload
+# CORS Support
 python-multipart==0.0.12

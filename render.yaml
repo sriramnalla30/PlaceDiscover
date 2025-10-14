@@ -10,8 +10,6 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.13.4
-      - key: GEMINI_API_KEY
-        sync: false
       - key: SERPSTACK_API_KEY
         sync: false
     healthCheckPath: /
