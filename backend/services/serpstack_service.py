@@ -58,38 +58,84 @@ class SerpStackService:
             # Extract results
             results = []
             
-            # PRIORITY 1: Local Results (Best for location-specific searches)
+            # PRIORITY 1: Extract phone numbers from related_places first
+            related_places = data.get('related_places', [])
+            phone_map = {}
+            
+            if related_places:
+                import re
+                print(f"\n📞 Extracting phone numbers from related_places...")
+                for place in related_places:
+                    place_text = place.get('places', '')
+                    title = place.get('title', '')
+                    
+                    # Extract phone number using regex (Indian format)
+                    # Matches: 092990 50505, 072073 31335, 095780 01111
+                    phone_match = re.search(r'(\d{5}\s?\d{5}|\d{10})', place_text)
+                    if phone_match:
+                        phone = phone_match.group(1).replace(' ', '')
+                        phone_map[title] = phone
+                        print(f"   📞 {title}: {phone}")
+            
+            # PRIORITY 2: Local Results (Best for location-specific searches)
             local_results = data.get('local_results', [])
             if local_results:
                 print(f"\n📍 Found {len(local_results)} local results")
                 for local in local_results:
+                    business_name = local.get('title', '')
+                    
+                    # Get phone number from phone_map
+                    phone = phone_map.get(business_name, '')
+                    
+                    # Build description from extensions
+                    extensions = local.get('extensions', [])
+                    description = f"Local result from Google Maps."
+                    if extensions:
+                        description += f" {', '.join(extensions[:2])}"
+                    
                     place = {
-                        'name': local.get('title', ''),
+                        'name': business_name,
                         'address': local.get('address', ''),
-                        'phone': local.get('type', ''),  # Often contains phone
-                        'description': f"Local result from Google Maps. {local.get('extensions', [''])[0] if local.get('extensions') else ''}",
+                        'phone': phone,
+                        'description': description,
                         'source': 'SerpStack (Google Local)',
                         'rating': local.get('rating'),
                         'reviews': local.get('reviews'),
                         'url': local.get('url', '')
                     }
                     
-                    # Clean up phone number from type field
-                    if place['phone'] and not place['phone'].startswith('+'):
-                        # type field might be phone or other info
-                        if any(char.isdigit() for char in place['phone']):
-                            place['phone'] = place['phone']
-                        else:
-                            place['phone'] = ''
-                    
                     results.append(place)
-                    print(f"   ✅ {place['name']} - {place['address'][:50]}...")
+                    phone_display = f"📞 {phone}" if phone else "No phone"
+                    print(f"   ✅ {place['name']} | {phone_display}")
             
-            # PRIORITY 2: Organic Results (Regular search results)
+            # PRIORITY 2: Organic Results (Only if we need more results)
+            # Skip generic directory listings (JustDial, Sulekha, etc.)
             organic_results = data.get('organic_results', [])
-            if organic_results and len(results) < 6:
+            if organic_results and len(results) < 3:  # Only add if we have less than 3 local results
                 print(f"\n🌐 Found {len(organic_results)} organic results")
+                
+                # Filter out directory websites
+                directory_domains = [
+                    'justdial.com',
+                    'sulekha.com',
+                    'gympik.com',
+                    'zomato.com',
+                    'magicbricks.com',
+                    'yellow-pages.com',
+                    '99acres.com',
+                    'timesnow.com',
+                    'indiamart.com',
+                    'tradeindia.com'
+                ]
+                
                 for organic in organic_results[:6 - len(results)]:
+                    url = organic.get('url', '').lower()
+                    
+                    # Skip if it's a directory listing
+                    if any(domain in url for domain in directory_domains):
+                        print(f"   ⏭️  Skipped directory: {organic.get('title', '')[:50]}...")
+                        continue
+                    
                     # Extract rating and reviews from rich snippet
                     rich_snippet = organic.get('rich_snippet', {})
                     rating = None

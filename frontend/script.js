@@ -84,7 +84,23 @@ function displayResults(places) {
     resultsContainer.appendChild(placeCard);
   });
 
+  // Update results badge count
+  const resultsBadge = document.getElementById("resultsBadge");
+  if (resultsBadge) {
+    resultsBadge.textContent = `${places.length} ${
+      places.length === 1 ? "place" : "places"
+    }`;
+  }
+
   results.style.display = "block";
+
+  // Force blur on type select to close any open dropdown
+  typeSelect.blur();
+
+  // Scroll to results section smoothly (also closes dropdown)
+  setTimeout(() => {
+    results.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 100);
 }
 
 // Create individual place card
@@ -96,11 +112,16 @@ function createPlaceCard(place) {
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
     place.name + " " + place.address
   )}`;
-  const phoneUrl = place.phone ? `tel:${place.phone}` : null;
+
+  // Format phone number for display and calling
+  const phoneUrl = place.phone ? `tel:+91${place.phone}` : null;
+  const formattedPhone = place.phone
+    ? place.phone.replace(/(\d{5})(\d{5})/, "$1 $2")
+    : null;
 
   card.innerHTML = `
         <div class="place-header">
-            <div>
+            <div class="place-info">
                 <div class="place-name">${place.name}</div>
                 <div class="place-type">${place.type || typeSelect.value}</div>
             </div>
@@ -119,30 +140,34 @@ function createPlaceCard(place) {
                 : ""
             }
         </div>
-        <div class="place-address">
-            <i class="fas fa-map-marker-alt"></i> ${place.address}
+        <div class="place-details">
+            <div class="place-address">
+                <i class="fas fa-map-marker-alt"></i> 
+                <span>${place.address}</span>
+            </div>
+            ${
+              place.phone
+                ? `
+                <div class="place-phone">
+                    <i class="fas fa-phone"></i> 
+                    <a href="${phoneUrl}" class="phone-link">${formattedPhone}</a>
+                </div>
+            `
+                : ""
+            }
+            ${
+              place.source
+                ? `
+                <div class="place-source">
+                    <i class="fas fa-check-circle"></i> ${place.source}
+                </div>
+            `
+                : ""
+            }
         </div>
-        ${
-          place.phone
-            ? `
-            <div class="place-phone">
-                <i class="fas fa-phone"></i> ${place.phone}
-            </div>
-        `
-            : ""
-        }
-        ${
-          place.source
-            ? `
-            <div class="place-source">
-                <i class="fas fa-check-circle"></i> ${place.source}
-            </div>
-        `
-            : ""
-        }
         <div class="place-actions">
             <a href="${mapsUrl}" target="_blank" class="action-btn maps-btn">
-                <i class="fas fa-directions"></i> Get Directions
+                <i class="fas fa-map-location-dot"></i> Open in Maps
             </a>
             ${
               phoneUrl
@@ -470,10 +495,8 @@ function showAreaDropdown(areas, searchValue) {
   areaDropdown.style.display = "block";
 
   if (areas.length === 0) {
-    const noResults = document.createElement("div");
-    noResults.className = "autocomplete-item no-results";
-    noResults.textContent = "No areas found for this city";
-    areaDropdown.appendChild(noResults);
+    // Simply hide the dropdown if no results
+    areaDropdown.style.display = "none";
     return;
   }
 
