@@ -1,0 +1,10 @@
+# Ignore backend files - Netlify only serves frontend
+
+backend/
+requirements.txt
+render.yaml
+_.py
+**pycache**/
+.venv/
+_.pyc
+.env

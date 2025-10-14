@@ -1,22 +1,12 @@
 # 🗺️ PlaceDiscover - Real-time Business Discovery# 🗺️ PlaceDiscover - Real-time Business Discovery# 🗺️ PlaceDiscover - Real-time Business Discovery
 
-
-
-**Discover businesses with accurate, real-time data****Discover businesses with accurate, real-time data\*\***Discover businesses with accurate, real-time data\*\*
-
-
+**Discover businesses with accurate, real-time data\*\***Discover businesses with accurate, real-time data\*\*\*\*Discover businesses with accurate, real-time data\*\*
 
 A modern web application for searching and discovering local businesses using real-time Google data.A modern web application for searching and discovering local businesses using real-time Google data.A modern web application for searching and discovering local businesses using real-time Google data.
 
-
-
-------
-
-
+---
 
 ## ✨ Features## ✨ Features## ✨ Features
-
-
 
 - 🔍 **Real-time Search**: Get up-to-date business information- 🔍 **Real-time Search**: Get up-to-date business information- **Real-time Search**: Get up-to-date business information
 
@@ -44,23 +34,17 @@ A modern web application for searching and discovering local businesses using re
 
 - 🎨 **Modern UI**: Dark theme with smooth animations- 🎨 **Modern UI**: Dark theme with smooth animations
 
-**Frontend**: HTML5, CSS3, Vanilla JavaScript  
+**Frontend**: HTML5, CSS3, Vanilla JavaScript
 
-**Backend**: FastAPI, Python 3.8+  - 📱 **Responsive Design**: Works on all devices- 📱 **Responsive Design**: Works on all devices
+**Backend**: FastAPI, Python 3.8+ - 📱 **Responsive Design**: Works on all devices- 📱 **Responsive Design**: Works on all devices
 
-**API**: SerpStack (Real-time Google data)  
+**API**: SerpStack (Real-time Google data)
 
 **Server**: Uvicorn ASGI---
 
-
-
 ---## 🎨 Technology Stack## 🎨 Technology Stack
 
-
-
 ## 🚀 Quick Start**Frontend**: HTML5, CSS3, Vanilla JavaScript **Frontend**: HTML5, CSS3, Vanilla JavaScript
-
-
 
 ### Prerequisites**Backend**: FastAPI, Python 3.8+ **Backend**: FastAPI, Python 3.8+
 
@@ -68,15 +52,11 @@ A modern web application for searching and discovering local businesses using re
 
 - SerpStack API Key (free tier: 100 requests/month)**API**: SerpStack (Real-time Google data) **API**: SerpStack (Real-time Google data)
 
-
-
 ### Installation**Server**: Uvicorn ASGI**Server**: Uvicorn ASGI
-
-
 
 1. **Clone the repository**---
 
-```bash
+````bash
 
 git clone https://github.com/sriramnalla30/PlaceDiscover.git## 🚀 Quick Start## 🚀 Quick Start
 
@@ -108,7 +88,7 @@ Edit `backend/services/serpstack_service.py`:`bash`bash
 
 self.api_key = "YOUR_SERPSTACK_API_KEY"git clone https://github.com/sriramnalla30/PlaceDiscover.gitgit clone https://github.com/sriramnalla30/PlaceDiscover.git
 
-```
+````
 
 cd PlaceDiscovercd PlaceDiscover
 
@@ -120,7 +100,7 @@ cd backend
 
 python -m uvicorn main:app --port 8003 --reload
 
-```
+````
 
 2. **Install dependencies**2. **Install dependencies**
 
@@ -152,17 +132,11 @@ pip install fastapi uvicorn requests python-dotenvpip install fastapi uvicorn re
 
 6. Click phone to call or "Open in Maps" for directions```python
 
-
-
 ---self.api_key = "YOUR_SERPSTACK_API_KEY"Edit `backend/services/serpstack_service.py`:1. Install dependencies:
-
-
 
 ## 🏗️ Project Structure```
 
-
-
-```````python
+`````````python
 
 PlaceDiscover/
 
@@ -500,4 +474,4 @@ MIT License - Open source
 ---
 
 **Made with ❤️ by Sri Ram Nalla**
-````````
+`````````
