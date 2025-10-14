@@ -10,6 +10,6 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "https://place-search-gen-ai.onrender.com"
+  to = "https://place-search-gen-ai.onrender.com/:splat"
   status = 200
   force = false
