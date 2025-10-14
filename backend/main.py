@@ -5,8 +5,8 @@ from typing import List, Optional
 import os
 from dotenv import load_dotenv
 
-from services.serpstack_service import SerpStackService
-from models.place import Place, SearchRequest
+from backend.services.serpstack_service import SerpStackService
+from backend.models.place import Place, SearchRequest
 
 # Load environment variables
 load_dotenv()
