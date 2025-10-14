@@ -1,6 +1,6 @@
-// Configuration - Connected to Local Backend for Testing
-// Using local backend with SerpStack (Real Google Data)
-const API_BASE_URL = "http://localhost:8003";
+// Configuration - Connected to Live Render Backend
+// Using Render backend with SerpStack (Real Google Data)
+const API_BASE_URL = "https://place-search-gen-ai.onrender.com";
 
 // DOM Elements
 const cityInput = document.getElementById("city");
