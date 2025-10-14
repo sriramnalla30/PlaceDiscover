@@ -2,9 +2,10 @@
 
 backend/
 requirements.txt
+runtime-requirements.txt
 render.yaml
-_.py
-**pycache**/
+*.py
+__pycache__/
 .venv/
-_.pyc
+*.pyc
 .env
