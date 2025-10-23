@@ -1,7 +1,6 @@
 # 🗺️ PlaceDiscover - Real-time Business Discovery 
-## URL: https://placediscover.netlify.app/ ##
-
 Discover local businesses with accurate, real-time Google data. PlaceDiscover is a modern web application for searching and discovering local businesses (restaurants, gyms, hospitals, hotels, banks, etc.) with ratings, contact info, and map directions.
+## URL: https://placediscover.netlify.app/ 
 
 ---
 
