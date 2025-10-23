@@ -1,4 +1,4 @@
-# 🗺️ PlaceDiscover - Real-time Business Discovery# 🗺️ PlaceDiscover - Real-time Business Discovery# 🗺️ PlaceDiscover - Real-time Business Discovery
+# 🗺️ PlaceDiscover - Real-time Business Discovery# 
 
 **Discover businesses with accurate, real-time data\*\***Discover businesses with accurate, real-time data\*\*\*\*Discover businesses with accurate, real-time data\*\*
 
