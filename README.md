@@ -244,13 +244,6 @@ python -m uvicorn main:app --port 8003 --reload---
 
 
 
-## 📄 LicensePlaceDiscover/
-
-
-
-MIT License - Open source├── frontend/## 📖 Usage```bash
-
-
 
 ---│   ├── index.html          # Main HTML
 
@@ -335,7 +328,7 @@ Place_Search-Gen_AI/
 
 ---
 
-│   └── script.js           # Frontend logic- Set environment variables (GEMINI_API_KEY)
+│   └── script.js          
 
 ## 🐛 Troubleshooting
 
@@ -379,13 +372,8 @@ MIT License - Open source## Environment Variables
 
 
 
-## 👨‍💻 Developer- `GEMINI_API_KEY`: Your Google Gemini API key
-
-
-
-**Sri Ram Nalla**## 🎨 Technology Stack
-
-
+## 👨‍💻 Developer- 
+**Sri Ram Nalla**##
 
 - 🔗 [GitHub](https://github.com/sriramnalla30)## API Endpoints
 
@@ -455,12 +443,6 @@ python -m uvicorn main:app --port 8003 --reload
 - Check API key
 - Verify backend is running (http://localhost:8003/docs)
 - Check API quota (100/month free tier)
-
----
-
-## 📄 License
-
-MIT License - Open source
 
 ---
 
